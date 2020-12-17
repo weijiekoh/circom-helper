@@ -1,4 +1,6 @@
 build/*
+compiled/*
+temp/*
 
 # Logs
 logs

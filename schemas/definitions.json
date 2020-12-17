@@ -1,0 +1,19 @@
+{
+    "$id": "definitions",
+    "title": "JSON Schema Definitions",
+    "description": "Common JSON Schema types",
+    "definitions": {
+        "bytes32": {
+            "$id": "#bytes32",
+            "type": "string",
+            "pattern": "^0x([A-Fa-f0-9]{64})$"
+        },
+        "ethereumSignature": {
+            "$id": "#ethereumSignature",
+            "type": "string",
+            "pattern": "^0x[A-Fa-f0-9]{128}1(c|b)$"
+        }
+    }
+}
+
+

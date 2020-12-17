@@ -6,7 +6,13 @@
   "scripts": {
     "watch": "tsc --watch",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test-server": "jest --testPathPattern=__tests__/Server.test.ts",
+    "test-server-debug": "node --inspect-brk ./node_modules/.bin/jest --testPathPattern=__tests__/Server.test.ts",
+    "test-genWitness": "jest --testPathPattern=__tests__/genWitness.test.ts",
+    "test-genWitness-debug": "node --inspect-brk ./node_modules/.bin/jest --testPathPattern=__tests__/genWitness.test.ts"
+  },
+  "bin": {
+    "circom-helper": "build/index.js"
   },
   "repository": {
     "type": "git",
@@ -23,13 +29,29 @@
     "url": "https://github.com/weijiekoh/circom-helper/issues"
   },
   "homepage": "https://github.com/weijiekoh/circom-helper#readme",
+  "_moduleAliases": {
+    "@circom-helper": "."
+  },
   "dependencies": {
+    "@iden3/binfileutils": "0.0.7",
+    "ajv": "6.10.0",
     "argparse": "^2.0.1",
     "circom": "^0.5.35",
-    "snarkjs": "^0.3.45"
+    "circom_runtime": "^0.1.9",
+    "fastfile": "0.0.19",
+    "koa": "^2.8.2",
+    "koa-bodyparser": "^4.2.1",
+    "koa-helmet": "^4.2.0",
+    "module-alias": "^2.2.0",
+    "shelljs": "^0.8.4",
+    "snarkjs": "^0.3.45",
+    "verror": "^1.10.0",
+    "yaml": "^1.10.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.19",
+    "axios": "^0.21.0",
+    "ffjavascript": "^0.2.33",
     "jest": "^26.6.3",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.3"

@@ -1,0 +1,11 @@
+{
+    "title": "An echo request for testing",
+    "required": ["message"],
+    "additionalProperties": false,
+    "properties": {
+        "message": {
+            "type": ["string", "number"]
+        }
+    }
+}
+
