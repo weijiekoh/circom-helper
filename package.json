@@ -1,11 +1,12 @@
 {
   "name": "circom-helper",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A convenient way for developers to compile, cache, and execute circom circuits, as well as to generate proofs.",
   "main": "build/index.js",
   "scripts": {
     "watch": "tsc --watch",
     "build": "tsc",
+    "prepare": "tsc",
     "test-server": "jest --testPathPattern=ts/__tests__/Server.test.ts",
     "test-server-debug": "node --inspect-brk ./node_modules/.bin/jest --testPathPattern=ts/__tests__/Server.test.ts",
     "test-snarks": "jest --testPathPattern=__tests__/snarks.test.ts",
