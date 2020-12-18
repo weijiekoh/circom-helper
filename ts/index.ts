@@ -281,8 +281,14 @@ const main = async () => {
     const tempDirPath = path.resolve(args.temp_dir)
     fs.mkdirSync(tempDirPath, { recursive: true })
 
+    // Resolve each circuitDir relative to the config filepath
+    const resolveCircuitDirpath = (c: string) => {
+        const baseDir = path.dirname(configFilepath)
+        return path.join(baseDir, c)
+    }
+
     run(
-        config.circuitDirs.map((x) => path.resolve(x)),
+        config.circuitDirs.map(resolveCircuitDirpath),
         buildDirPath,
         tempDirPath,
         port,
