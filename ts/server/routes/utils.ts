@@ -1,4 +1,4 @@
-require('module-alias/register')
+require('module-alias/register')(__dirname)
 
 const definitions = require('@circom-helper/schemas/definitions.json')
 import Ajv from 'ajv'
