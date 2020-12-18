@@ -65,7 +65,7 @@ describe('Witness generation', () => {
     })
 
     test('handles the gen_witness method', async () => {
-        const circuit = 'test'
+        const circuit = 'poseidon'
         const inputs = stringifyBigInts({
             left: BigInt(1),
             right: BigInt(2),
@@ -89,7 +89,8 @@ describe('Witness generation', () => {
         const index = resp2.data.result.index
 
         const expectedOut = witness[index].toString()
-        expect(expectedOut).toEqual('3')
+        debugger
+        expect(expectedOut).toEqual('17117985411748610629288516079940078114952304104811071254131751175361957805920')
     })
 
 
