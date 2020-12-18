@@ -1,3 +1,4 @@
+jest.setTimeout(90000)
 const Koa = require('koa')
 import axios from 'axios'
 import * as path from 'path'
@@ -7,7 +8,7 @@ import * as JsonRpc from '../server/jsonRpc'
 import * as errors from '../server/errors'
 const ff = require('ffjavascript')
 const stringifyBigInts = ff.utils.stringifyBigInts
-import { run, loadSymbols } from '../'
+import { run } from '../'
 
 const PORT = 9000
 const HOST = 'http://localhost:' + PORT
@@ -76,16 +77,18 @@ describe('Witness generation', () => {
 
         const witness = resp.data.result.witness
 
-        const symbols = loadSymbols(
-            path.join(
-                __dirname,
-                '..',
-                '..',
-                'compiled/test.sym',
-            )
+        // Get the signal index
+        const resp2 = await post(
+            2,
+            'get_signal_index',
+            { circuit, name: 'main.out' },
         )
 
-        const expectedOut = witness[symbols['main.out'].varIdx].toString()
+        expect(resp2.status).toEqual(200)
+
+        const index = resp2.data.result.index
+
+        const expectedOut = witness[index].toString()
         expect(expectedOut).toEqual('3')
     })
 

@@ -3,6 +3,7 @@ import * as JsonRpc from '../jsonRpc'
 import * as Ajv from 'ajv'
 import echoRoute from './echo'
 import genWitnessRoute from './genWitness'
+import getSignalIndexRoute from './getSignalIndex'
 
 interface Route {
     reqValidator: Ajv.ValidateFunction
@@ -13,6 +14,7 @@ interface Route {
 const routes = {
     test_echo: echoRoute,
     gen_witness: genWitnessRoute,
+    get_signal_index: getSignalIndexRoute,
 }
 
 // Invoke the route

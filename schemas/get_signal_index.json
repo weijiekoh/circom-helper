@@ -1,0 +1,9 @@
+{
+    "title": "Get a circuit signal's varIdx value",
+    "required": ["circuit", "name"],
+    "additionalProperties": false,
+    "properties": {
+        "circuit": { "type": "string" },
+        "name": { "type": "string" }
+    }
+}

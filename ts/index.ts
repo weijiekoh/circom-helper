@@ -69,7 +69,7 @@ const compile = (
         
         if (skip) {
             log(`Skipping ${filepath}`)
-            return { r1csFilepath, wasmFilepath }
+            return { r1csFilepath, wasmFilepath, symFilepath, watFilepath }
         }
     }
 
@@ -79,7 +79,7 @@ const compile = (
         `-t ${watFilepath} -s ${symFilepath}`
     shelljs.exec(cmd)
 
-    return { r1csFilepath, wasmFilepath }
+    return { r1csFilepath, wasmFilepath, symFilepath, watFilepath }
 }
 
 const run = async (
@@ -133,16 +133,22 @@ const run = async (
         files.push(filepaths)
     }
 
-    // Load every circuit file
+    const circuitBasename = (f: any) => {
+        const l = f.wasmFilepath.length
+        return path.basename(
+            f.wasmFilepath.slice(0, l - '.wasm'.length)
+        )
+    }
+
+    // Load every circuit and symbol file
     const wcBuilders: any = {}
+    const symbols: any = {}
     for (const f of files) {
         const wc = await loadWasm(f.wasmFilepath)
-        const l = f.wasmFilepath.length
-        wcBuilders[
-            path.basename(
-                f.wasmFilepath.slice(0, l - '.wasm'.length)
-            )
-        ] = wc
+        wcBuilders[circuitBasename(f)] = wc
+
+        const syms = loadSymbols(f.symFilepath)
+        symbols[circuitBasename(f)] = syms
     }
 
     // Launch the server
@@ -151,6 +157,7 @@ const run = async (
         buildDir,
         tempDir,
         wcBuilders,
+        symbols,
     }
 
     return launchServer(port, state)
@@ -175,9 +182,9 @@ const loadSymbols = (
     for (const line of lines) {
         const vals = line.split(',')
         symbols[vals[3]] = {
-            labelIdx: Number(vals[0]),
+            //labelIdx: Number(vals[0]),
             varIdx: Number(vals[1]),
-            componentIdx: Number(vals[2]),
+            //componentIdx: Number(vals[2]),
         }
     }
     return symbols
