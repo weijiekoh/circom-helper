@@ -1,15 +1,15 @@
 {
   "name": "circom-helper",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A convenient way for developers to compile, cache, and execute circom circuits, as well as to generate proofs.",
   "main": "build/index.js",
   "scripts": {
     "watch": "tsc --watch",
     "build": "tsc",
-    "test-server": "jest --testPathPattern=__tests__/Server.test.ts",
-    "test-server-debug": "node --inspect-brk ./node_modules/.bin/jest --testPathPattern=__tests__/Server.test.ts",
-    "test-genWitness": "jest --testPathPattern=__tests__/genWitness.test.ts",
-    "test-genWitness-debug": "node --inspect-brk ./node_modules/.bin/jest --testPathPattern=__tests__/genWitness.test.ts"
+    "test-server": "jest --testPathPattern=ts/__tests__/Server.test.ts",
+    "test-server-debug": "node --inspect-brk ./node_modules/.bin/jest --testPathPattern=ts/__tests__/Server.test.ts",
+    "test-snarks": "jest --testPathPattern=__tests__/snarks.test.ts",
+    "test-snarks-debug": "node --inspect-brk ./node_modules/.bin/jest --testPathPattern=ts/__tests__/snarks.test.ts"
   },
   "bin": {
     "circom-helper": "build/index.js"

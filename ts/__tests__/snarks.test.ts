@@ -89,7 +89,6 @@ describe('Witness generation', () => {
         const index = resp2.data.result.index
 
         const expectedOut = witness[index].toString()
-        debugger
         expect(expectedOut).toEqual('17117985411748610629288516079940078114952304104811071254131751175361957805920')
     })
 
