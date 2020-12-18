@@ -1,4 +1,6 @@
-require('module-alias/register')
+import * as fs from 'fs'
+import * as path from 'path'
+//require('module-alias/register')
 import Ajv from 'ajv'
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser'
@@ -14,7 +16,18 @@ import { genError, BackendErrorNames, } from './errors'
 
 const ajv = new Ajv()
 ajv.addMetaSchema(require('ajv/lib/refs/json-schema-draft-06.json'))
-const jsonRpcSchema = require('@circom-helper/schemas/jsonRpc.json')
+//const jsonRpcSchema = require('@circom-helper/schemas/jsonRpc.json')
+const jsonRpcSchema = JSON.parse(
+    fs.readFileSync(
+        path.join(
+            __dirname,
+            '..',
+            '..',
+            'schemas',
+            'jsonRpc.json',
+        ),
+    ).toString()
+    )
 const basicValidate = ajv.compile(jsonRpcSchema)
 
 /*
