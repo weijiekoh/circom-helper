@@ -16,59 +16,24 @@ const handler = async (
     const tempDir = state.tempDir
     const wasmFilepath = path.join(buildDir, circuit + '.wasm')
 
-    // A random hex string.
-    // Doesn't need to be secure.
-    const rand = BigInt(Math.floor(Math.random() * 4294967296)).toString(16)
-    const id = `${(new Date()).toISOString()}.${rand}`
-
+    // The pregenerated WitnessCalculatorBuilder
     const wc = state.wcBuilders[path.basename(circuit)]
-    const witness = stringifyBigInts(await wc.calculateWitness(inputs, true))
 
-    //const inputFilepath = path.join(
-        //tempDir,
-        //`${circuit}.${id}.input.json`,
-    //)
-
-    //fs.writeFileSync(
-        //inputFilepath,
-        //JSON.stringify(inputs),
-    //)
-    //const wtnsFilepath = path.join(tempDir, `${circuit}.${id}.wtns`)
-    //const wtnsJsonFilepath = path.join(tempDir, `${circuit}.${id}.wtns.json`)
-    //const snarkjsPath = path.join(
-        //path.resolve(__dirname),
-        //'../../../',
-        //'node_modules/snarkjs/build/cli.cjs',
-    //)
-    //const wtnsBin = await wc.calculateBinWitness(inputs)
-    //const fdWtns = await binFileUtils.createBinFile(wtnsFilepath, 'wtns', 2, 2);
-    //await writeBin(fdWtns, wtnsBin, wc.prime)
-    //await fdWtns.close();
-
-    //let result
-    //const wcCmd = `node ${snarkjsPath} wc ${wasmFilepath} ${inputFilepath} ${wtnsFilepath}`
-    //result = shelljs.exec(wcCmd)
-
-    //const wejCmd = `node ${snarkjsPath} wej ${wtnsFilepath} ${wtnsJsonFilepath}`
-    //result = shelljs.exec(wejCmd)
-
-    //const witness = JSON.parse(
-        //fs.readFileSync(wtnsJsonFilepath).toString(),
-    //)
-
-    if (!fs.existsSync(wasmFilepath)) {
-        const errorMsg = 'wasm file not found: ' + wasmFilepath
+    try {
+        // Generate the witness
+        const witness = stringifyBigInts(await wc.calculateWitness(inputs, true))
+        return { witness }
+    } catch (e) {
+        const errorMsg = e.toString()
         throw {
-            code: errors.errorCodes.GENWITNESS_CIRCUIT_NOT_FOUND,
+            code: errors.errorCodes.GENWITNESS_ERROR,
             message: errorMsg,
             data: errors.genError(
-                errors.BackendErrorNames.GENWITNESS_CIRCUIT_NOT_FOUND,
+                errors.BackendErrorNames.GENWITNESS_ERROR,
                 errorMsg,
             )
         }
     }
-
-    return { witness }
 }
 
 const route = {

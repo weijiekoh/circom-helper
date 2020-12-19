@@ -64,11 +64,12 @@ describe('Witness generation', () => {
         )
     })
 
-    test('handles the gen_witness method', async () => {
+    test('the gen_witness method should return a valid witness', async () => {
         const circuit = 'poseidon'
         const inputs = stringifyBigInts({
             left: BigInt(1),
             right: BigInt(2),
+            expectedHash: BigInt('17117985411748610629288516079940078114952304104811071254131751175361957805920'),
         })
 
         const resp = await post(1, 'gen_witness', { circuit, inputs })
@@ -92,6 +93,22 @@ describe('Witness generation', () => {
         expect(expectedOut).toEqual('17117985411748610629288516079940078114952304104811071254131751175361957805920')
     })
 
+    test('the gen_witness method should return an error if the inputs are wrong', async () => {
+        const circuit = 'poseidon'
+        const inputs = stringifyBigInts({
+            left: BigInt(1),
+            right: BigInt(2),
+            expectedHash: BigInt(1234), // incorrect hash value
+        })
+
+        const resp = await post(1, 'gen_witness', { circuit, inputs })
+
+        expect(resp.status).toEqual(200)
+
+        const error = resp.data.error
+
+        expect(resp.data.error).toBeTruthy()
+    })
 
     afterAll(async () => {
         await server.close()
