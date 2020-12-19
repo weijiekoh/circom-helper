@@ -141,6 +141,7 @@ const run = async (
     }
 
     // Load every circuit and symbol file
+    log('Loading WASM and SYM files to memory...')
     const wcBuilders: any = {}
     const symbols: any = {}
     for (const f of files) {

@@ -22,7 +22,7 @@ const handler = async (
     const id = `${(new Date()).toISOString()}.${rand}`
 
     const wc = state.wcBuilders[path.basename(circuit)]
-    const witness = stringifyBigInts(await wc.calculateWitness(inputs))
+    const witness = stringifyBigInts(await wc.calculateWitness(inputs, true))
 
     //const inputFilepath = path.join(
         //tempDir,
