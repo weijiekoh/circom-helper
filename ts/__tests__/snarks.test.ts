@@ -52,9 +52,12 @@ const circuitDirs = JSON.parse(
     ).toString(),
 ).circuitDirs
 
+const circomPath = path.join(rootDir, 'node_modules/circom/cli.js')
+
 describe('Witness generation', () => {
     beforeAll(async () => {
         server = await run(
+            circomPath,
             circuitDirs,
             path.join(rootDir, 'compiled'),
             path.join(rootDir, 'temp'),

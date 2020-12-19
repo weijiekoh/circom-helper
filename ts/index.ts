@@ -22,6 +22,7 @@ const version = JSON.parse(fs.readFileSync(
 ).toString()).version
 
 const compile = (
+    circomPath: string,
     filepath: string,
     buildDir: string,
     noClobber: boolean,
@@ -32,12 +33,6 @@ const compile = (
             console.log(s)
         }
     }
-
-    const circomPath = path.join(
-        path.resolve(__dirname),
-        '..',
-        'node_modules/circom/cli.js'
-    )
     const filename = path.basename(filepath)
     const withoutExtension = filename.slice(
         0,
@@ -83,6 +78,7 @@ const compile = (
 }
 
 const run = async (
+    circomPath: string,
     circuitDirs: string[],
     buildDir: string,
     tempDir: string,
@@ -123,7 +119,7 @@ const run = async (
 
     for (const f of filesToCompile) {
         const start = Date.now()
-        const filepaths = compile(f, buildDir, noClobber, quiet)
+        const filepaths = compile(circomPath, f, buildDir, noClobber, quiet)
         const end = Date.now()
 
         const duration = Math.round((end - start) / 1000)
@@ -288,7 +284,13 @@ const main = async () => {
         return path.join(baseDir, c)
     }
 
+    const circomPath = path.join(
+        path.dirname(configFilepath),
+        config.circom,
+    )
+
     run(
+        circomPath,
         config.circuitDirs.map(resolveCircuitDirpath),
         buildDirPath,
         tempDirPath,
