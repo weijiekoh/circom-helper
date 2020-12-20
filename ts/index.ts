@@ -242,10 +242,11 @@ const main = async () => {
         '-y', '--compile-only',
         { 
             required: false,
-            action: 'store_false', 
+            action: 'store_true', 
             help: 'Only compile circuits and do not launch the JSON-RPC server',
         },
     )
+
     parser.add_argument(
         '-p', '--port',
         { 
