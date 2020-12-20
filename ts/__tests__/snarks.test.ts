@@ -10,7 +10,7 @@ const ff = require('ffjavascript')
 const stringifyBigInts = ff.utils.stringifyBigInts
 import { run } from '../'
 
-const PORT = 9000
+const PORT = 9002
 const HOST = 'http://localhost:' + PORT
 
 const OPTS = {
@@ -60,9 +60,9 @@ describe('Witness generation', () => {
             circomPath,
             circuitDirs,
             path.join(rootDir, 'compiled'),
-            path.join(rootDir, 'temp'),
-            9000,
+            PORT,
             true,
+            false,
             false,
         )
     })

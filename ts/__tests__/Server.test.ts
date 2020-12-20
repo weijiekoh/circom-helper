@@ -4,7 +4,7 @@ import axios from 'axios'
 import * as JsonRpc from '../server/jsonRpc'
 import * as errors from '../server/errors'
 
-const PORT = 9000
+const PORT = 9002
 const HOST = 'http://localhost:' + PORT
 
 const OPTS = {

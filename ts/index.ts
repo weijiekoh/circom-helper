@@ -81,10 +81,10 @@ const run = async (
     circomPath: string,
     circuitDirs: string[],
     buildDir: string,
-    tempDir: string,
     port: number,
     noClobber: boolean,
     quiet: boolean,
+    compileOnly = false,
 ) => {
     const log = (s: string) => {
         if (!quiet) {
@@ -129,6 +129,10 @@ const run = async (
         files.push(filepaths)
     }
 
+    if (compileOnly) {
+        return
+    }
+
     const circuitBasename = (f: any) => {
         const l = f.wasmFilepath.length
         return path.basename(
@@ -152,7 +156,6 @@ const run = async (
     log(`Launching JSON-RPC server at port ${port}`)
     const state = {
         buildDir,
-        tempDir,
         wcBuilders,
         symbols,
     }
@@ -236,12 +239,11 @@ const main = async () => {
         },
     )
     parser.add_argument(
-        '-t', '--temp_dir',
+        '-y', '--compile-only',
         { 
-            required: true,
-            action: 'store', 
-            type: String, 
-            help: 'The output directory for temporary files',
+            required: false,
+            action: 'store_false', 
+            help: 'Only compile circuits and do not launch the JSON-RPC server',
         },
     )
     parser.add_argument(
@@ -275,9 +277,6 @@ const main = async () => {
     const buildDirPath = path.resolve(args.build_dir)
     fs.mkdirSync(buildDirPath, { recursive: true })
 
-    const tempDirPath = path.resolve(args.temp_dir)
-    fs.mkdirSync(tempDirPath, { recursive: true })
-
     // Resolve each circuitDir relative to the config filepath
     const resolveCircuitDirpath = (c: string) => {
         const baseDir = path.dirname(configFilepath)
@@ -293,10 +292,10 @@ const main = async () => {
         circomPath,
         config.circuitDirs.map(resolveCircuitDirpath),
         buildDirPath,
-        tempDirPath,
         port,
         args.no_clobber,
         args.quiet,
+        args.compile_only,
     )
 }
 
