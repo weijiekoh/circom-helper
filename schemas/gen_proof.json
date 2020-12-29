@@ -1,0 +1,12 @@
+{
+    "title": "Generate a witness",
+    "required": ["circuit", "witness"],
+    "additionalProperties": false,
+    "properties": {
+        "circuit": { "type": "string" },
+        "witness": {
+            "type": "array",
+            "items": {  "type": "string" }
+        }
+    }
+}

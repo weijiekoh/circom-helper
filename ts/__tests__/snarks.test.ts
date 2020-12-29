@@ -113,6 +113,10 @@ describe('Witness generation', () => {
         expect(resp.data.error).toBeTruthy()
     })
 
+    //test('the gen_proof method should provide a valid proof', async () => {
+        //// TODO
+    //})
+
     afterAll(async () => {
         await server.close()
     })
