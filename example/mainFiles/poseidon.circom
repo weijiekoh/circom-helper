@@ -1,14 +1,13 @@
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 
 template Hasher() {
-    signal input left;
-    signal input right;
+    signal input in[2];
     signal input expectedHash;
     signal output out;
 
     component hasher = Poseidon(2);
-    hasher.inputs[0] <== left;
-    hasher.inputs[1] <== right;
+    hasher.inputs[0] <== in[0];
+    hasher.inputs[1] <== in[1];
 
     expectedHash === hasher.out;
 

@@ -29,6 +29,12 @@ npm i && \
 npm run build
 ```
 
+Install dependencies:
+
+```
+sudo apt-get install libgmp-dev nlohmann-json3-dev nasm g++
+```
+
 TODO: add `zkutil` installation instructions
 
 ## User guide

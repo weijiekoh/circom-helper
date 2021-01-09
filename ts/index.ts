@@ -12,7 +12,6 @@ const { WitnessCalculatorBuilder } = circomRuntime
 
 const CIRCOM_FILE_EXTENSION = '.circom'
 const CACHE_DIRNAME = 'cache'
-
 const version = JSON.parse(fs.readFileSync(
     path.join(
         __dirname,
@@ -49,6 +48,8 @@ const compile = (
         path.join(path.resolve(buildDir), withoutExtension + '.wat')
     const symFilepath = 
         path.join(path.resolve(buildDir), withoutExtension + '.sym')
+    const witnessGenFilepath
+        = path.join( path.resolve(buildDir), withoutExtension)
 
     if (noClobber) {
         let skip = true
@@ -69,16 +70,28 @@ const compile = (
     }
 
     log(`Compiling ${filepath}`)
-    const cmd = `NODE_OPTIONS=--max-old-space-size=4096 node ${circomPath} ` +
+    let cmd = `NODE_OPTIONS=--max-old-space-size=4096 node ${circomPath} ` +
         `${filepath} -r ${r1csFilepath} -c ${cFilepath} -w ${wasmFilepath} ` +
         `-t ${watFilepath} -s ${symFilepath}`
-    shelljs.exec(cmd)
+    shelljs.exec(cmd, {silent: true})
 
-    return { r1csFilepath, wasmFilepath, symFilepath, watFilepath }
+    const srcs = 
+        path.join(path.resolve(buildDir), 'main.cpp') + ' ' +
+        path.join(path.resolve(buildDir), 'calcwit.cpp') + ' ' +
+        path.join(path.resolve(buildDir), 'utils.cpp') + ' ' +
+        path.join(path.resolve(buildDir), 'fr.cpp') + ' ' +
+        path.join(path.resolve(buildDir), 'fr.o')
+    cmd = `g++ -pthread ${srcs} ` +
+        `${cFilepath} -o ${witnessGenFilepath} ` + 
+        `-lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`
+    shelljs.exec(cmd, {silent: true})
+
+    return { r1csFilepath, wasmFilepath, symFilepath, watFilepath, witnessGenFilepath }
 }
 
 const run = async (
     circomPath: string,
+    snarkjsPath: string,
     circuitDirs: string[],
     buildDir: string,
     port: number,
@@ -92,14 +105,61 @@ const run = async (
         }
     }
 
+    // Copy .cpp and .hpp files
+    let cppPath = path.join(
+        __dirname,
+        '..',
+        'node_modules',
+        'circom_runtime',
+        'c',
+        '*.cpp'
+    )
+    const target = path.resolve(buildDir)
+    let cmd
+    cmd = `cp ${cppPath} ${target}`
+    shelljs.exec(cmd)
+
+    let hppPath = path.join(
+        __dirname,
+        '..',
+        'node_modules',
+        'circom_runtime',
+        'c',
+        '*.hpp'
+    )
+    cmd = `cp ${hppPath} ${target}`
+    shelljs.exec(cmd)
+
+    const buildZqFieldPath = path.join(
+        __dirname,
+        '..',
+        'node_modules',
+        'ffiasm',
+        'src',
+        'buildzqfield.js',
+    )
+    cmd = `node ${buildZqFieldPath} -q 21888242871839275222246405745257275088548364400416034343698204186575808495617 -n Fr`
+    shelljs.exec(cmd)
+
+    cmd = `mv fr.asm fr.cpp fr.hpp ${target}`
+    shelljs.exec(cmd)
+
+    const frAsmPath = path.join(
+        target,
+        'fr.asm',
+    )
+    cmd = `nasm -felf64 ${frAsmPath}`
+    shelljs.exec(cmd)
+
     // For each circom file in each circuit dir, compile its circom files
     const filesToCompile: string[] = []
     const d: any = {}
+    const numInputsPerCircuit: any = {}
     for (const c of circuitDirs) {
         for (const file of fs.readdirSync(c)) {
             if (file.endsWith(CIRCOM_FILE_EXTENSION)) {
-                filesToCompile.push(path.join(path.resolve(c), file))
-
+                const fp = path.join(path.resolve(c), file)
+                filesToCompile.push(fp)
                 if (d[file]) {
                     // Emit an error if there are any filename collisions
                     // e.g. a/test.circom collides with b.circom
@@ -120,6 +180,21 @@ const run = async (
     for (const f of filesToCompile) {
         const start = Date.now()
         const filepaths = compile(circomPath, f, buildDir, noClobber, quiet)
+        const cmd = `node ${snarkjsPath} r1cs info ${filepaths.r1csFilepath}`
+        const output = shelljs.exec(cmd, {silent: true})
+        let numInputs = 0
+        const m1 = output.match(/# of Private Inputs: (\d+)/)
+        const m2 = output.match(/# of Public Inputs: (\d+)/)
+        if (m1) {
+            numInputs += Number(m1[1])
+        }
+        if (m2) {
+            numInputs += Number(m2[1])
+        }
+        const bn = path.basename(f)
+        const circuitName = bn.slice(0, bn.length - 7)
+        numInputsPerCircuit[circuitName] =  numInputs
+
         const end = Date.now()
 
         const duration = Math.round((end - start) / 1000)
@@ -140,37 +215,42 @@ const run = async (
         )
     }
 
-    // Load every circuit and symbol file
-    log('Loading WASM and SYM files to memory...')
-    const wcBuilders: any = {}
+    // Load symbol files
+    log('Loading SYM files to memory...')
+    const witnessGeneratorExes: any = {}
     const symbols: any = {}
     for (const f of files) {
-        const wc = await loadWasm(f.wasmFilepath)
-        wcBuilders[circuitBasename(f)] = wc
+        const baseName = circuitBasename(f)
+
+        witnessGeneratorExes[baseName] = baseName
 
         const syms = loadSymbols(f.symFilepath)
-        symbols[circuitBasename(f)] = syms
+        symbols[baseName] = syms
     }
 
     // Launch the server
-    log(`Launching JSON-RPC server at port ${port}`)
+    log(`Launched JSON-RPC server at port ${port}`)
     const state = {
+        numInputsPerCircuit,
         buildDir,
-        wcBuilders,
+        witnessGeneratorExes,
         symbols,
     }
 
     return launchServer(port, state)
 }
 
-const loadWasm = async (
+const compileWasm = async (
     wasmFilepath: string,
 ) => {
     const fdWasm = await fastFile.readExisting(wasmFilepath)
     const wasm = await fdWasm.read(fdWasm.totalSize)
     await fdWasm.close()
 
-    const wc = await WitnessCalculatorBuilder(wasm)
+    const options = {
+        sanityCheck: true,
+    }
+    const wc = await WitnessCalculatorBuilder(wasm, options)
     return wc
 }
 
@@ -289,8 +369,14 @@ const main = async () => {
         config.circom,
     )
 
+    const snarkjsPath = path.join(
+        path.dirname(configFilepath),
+        config.snarkjs,
+    )
+
     run(
         circomPath,
+        snarkjsPath,
         config.circuitDirs.map(resolveCircuitDirpath),
         buildDirPath,
         port,

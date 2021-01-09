@@ -1,5 +1,6 @@
 {
     "circom": "./node_modules/circom/cli.js",
+    "snarkjs": "./node_modules/snarkjs/build/cli.cjs",
     "circuitDirs": [
         "./example/mainFiles"
     ]

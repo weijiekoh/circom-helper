@@ -46,7 +46,6 @@ const handle = async (reqData: JsonRpc.Request, state: any) => {
             )
         }
     } catch (err) {
-
         return JsonRpc.genErrorResponse(
             reqData.id,
             err.code,
