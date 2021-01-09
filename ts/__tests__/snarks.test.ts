@@ -54,12 +54,16 @@ const circuitDirs = JSON.parse(
 
 const circomPath = path.join(rootDir, 'node_modules/circom/cli.js')
 const snarkjsPath = path.join(rootDir, 'node_modules/snarkjs/build/cli.cjs')
+const circomRuntimePath = path.join(rootDir, 'node_modules/circom_runtime')
+const ffiasmPath = path.join(rootDir, 'node_modules/ffiasm')
 
 describe('Witness generation', () => {
     beforeAll(async () => {
         server = await run(
             circomPath,
             snarkjsPath,
+            circomRuntimePath,
+            ffiasmPath,
             circuitDirs,
             path.join(rootDir, 'compiled'),
             PORT,

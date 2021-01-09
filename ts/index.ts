@@ -92,6 +92,8 @@ const compile = (
 const run = async (
     circomPath: string,
     snarkjsPath: string,
+    circomRuntimePath: string,
+    ffiasmPath: string,
     circuitDirs: string[],
     buildDir: string,
     port: number,
@@ -107,10 +109,7 @@ const run = async (
 
     // Copy .cpp and .hpp files
     let cppPath = path.join(
-        __dirname,
-        '..',
-        'node_modules',
-        'circom_runtime',
+        circomRuntimePath,
         'c',
         '*.cpp'
     )
@@ -120,10 +119,7 @@ const run = async (
     shelljs.exec(cmd)
 
     let hppPath = path.join(
-        __dirname,
-        '..',
-        'node_modules',
-        'circom_runtime',
+        circomRuntimePath,
         'c',
         '*.hpp'
     )
@@ -131,10 +127,7 @@ const run = async (
     shelljs.exec(cmd)
 
     const buildZqFieldPath = path.join(
-        __dirname,
-        '..',
-        'node_modules',
-        'ffiasm',
+        ffiasmPath,
         'src',
         'buildzqfield.js',
     )
@@ -374,9 +367,21 @@ const main = async () => {
         config.snarkjs,
     )
 
+    const circomRuntimePath = path.join(
+        path.dirname(configFilepath),
+        config.circom_runtime,
+    )
+
+    const ffiasmPath = path.join(
+        path.dirname(configFilepath),
+        config.ffiasm,
+    )
+
     run(
         circomPath,
         snarkjsPath,
+        circomRuntimePath,
+        ffiasmPath,
         config.circuitDirs.map(resolveCircuitDirpath),
         buildDirPath,
         port,
