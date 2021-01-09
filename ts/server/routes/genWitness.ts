@@ -12,7 +12,7 @@ const countItemInputs = (item: any) => {
     let numInputs = 0
     if (typeof item === 'object') {
         for (const e of item) {
-            numInputs += countInputs(e)
+            numInputs += countItemInputs(e)
         }
     } else {
         numInputs += 1
