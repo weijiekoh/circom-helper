@@ -59,13 +59,14 @@ const compile = (
             wasmFilepath,
             watFilepath,
             symFilepath,
+            witnessGenFilepath,
         ]) {
             skip = skip && fs.existsSync(f)
         }
         
         if (skip) {
             log(`Skipping ${filepath}`)
-            return { r1csFilepath, wasmFilepath, symFilepath, watFilepath }
+            return { r1csFilepath, wasmFilepath, symFilepath, watFilepath, witnessGenFilepath }
         }
     }
 
