@@ -42,10 +42,10 @@ const compile = (
         path.join(path.resolve(buildDir), withoutExtension + '.r1cs')
     const cFilepath = 
         path.join(path.resolve(buildDir), withoutExtension + '.c')
-    const wasmFilepath = 
-        path.join(path.resolve(buildDir), withoutExtension + '.wasm')
-    const watFilepath = 
-        path.join(path.resolve(buildDir), withoutExtension + '.wat')
+    //const wasmFilepath = 
+        //path.join(path.resolve(buildDir), withoutExtension + '.wasm')
+    //const watFilepath = 
+        //path.join(path.resolve(buildDir), withoutExtension + '.wat')
     const symFilepath = 
         path.join(path.resolve(buildDir), withoutExtension + '.sym')
     const witnessGenFilepath
@@ -56,8 +56,8 @@ const compile = (
         for (const f of [
             r1csFilepath,
             cFilepath,
-            wasmFilepath,
-            watFilepath,
+            //wasmFilepath,
+            //watFilepath,
             symFilepath,
             witnessGenFilepath,
         ]) {
@@ -66,15 +66,28 @@ const compile = (
         
         if (skip) {
             log(`Skipping ${filepath}`)
-            return { r1csFilepath, wasmFilepath, symFilepath, watFilepath, witnessGenFilepath }
+            return { 
+                r1csFilepath,
+                //wasmFilepath,
+                symFilepath,
+                //watFilepath,
+                witnessGenFilepath,
+            }
         }
     }
 
     log(`Compiling ${filepath}`)
-    let cmd = `NODE_OPTIONS=--max-old-space-size=4096 node ${circomPath} ` +
-        `${filepath} -r ${r1csFilepath} -c ${cFilepath} -w ${wasmFilepath} ` +
-        `-t ${watFilepath} -s ${symFilepath}`
-    shelljs.exec(cmd, {silent: true})
+    //let cmd = `NODE_OPTIONS=--max-old-space-size=4096 node --stack-size=8192 ${circomPath} ` +
+        //`${filepath} -r ${r1csFilepath} -c ${cFilepath} -w ${wasmFilepath} ` +
+        //`-t ${watFilepath} -s ${symFilepath}`
+    let cmd = `NODE_OPTIONS=--max-old-space-size=4096 node --stack-size=8192 ${circomPath} ` +
+        `${filepath} -r ${r1csFilepath} -c ${cFilepath} -s ${symFilepath}`
+
+    const compileOut = shelljs.exec(cmd, {silent: true})
+    if (compileOut.stderr) {
+        console.error(compileOut.stderr)
+        throw new Error('Could not compile ' + circomPath)
+    }
 
     const srcs = 
         path.join(path.resolve(buildDir), 'main.cpp') + ' ' +
@@ -87,7 +100,13 @@ const compile = (
         `-lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`
     shelljs.exec(cmd, {silent: true})
 
-    return { r1csFilepath, wasmFilepath, symFilepath, watFilepath, witnessGenFilepath }
+    return { 
+        r1csFilepath,
+        //wasmFilepath,
+        symFilepath,
+        //watFilepath,
+        witnessGenFilepath,
+    }
 }
 
 const run = async (
@@ -203,9 +222,9 @@ const run = async (
     }
 
     const circuitBasename = (f: any) => {
-        const l = f.wasmFilepath.length
+        const l = f.r1csFilepath.length
         return path.basename(
-            f.wasmFilepath.slice(0, l - '.wasm'.length)
+            f.r1csFilepath.slice(0, l - '.r1cs'.length)
         )
     }
 
@@ -234,19 +253,19 @@ const run = async (
     return launchServer(port, state)
 }
 
-const compileWasm = async (
-    wasmFilepath: string,
-) => {
-    const fdWasm = await fastFile.readExisting(wasmFilepath)
-    const wasm = await fdWasm.read(fdWasm.totalSize)
-    await fdWasm.close()
+//const compileWasm = async (
+    //wasmFilepath: string,
+//) => {
+    //const fdWasm = await fastFile.readExisting(wasmFilepath)
+    //const wasm = await fdWasm.read(fdWasm.totalSize)
+    //await fdWasm.close()
 
-    const options = {
-        sanityCheck: true,
-    }
-    const wc = await WitnessCalculatorBuilder(wasm, options)
-    return wc
-}
+    //const options = {
+        //sanityCheck: true,
+    //}
+    //const wc = await WitnessCalculatorBuilder(wasm, options)
+    //return wc
+//}
 
 const loadSymbols = (
     symFilepath: string
