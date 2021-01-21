@@ -26,6 +26,8 @@ const compile = (
     buildDir: string,
     noClobber: boolean,
     quiet: boolean,
+    maxOldSpaceSize: string,
+    stackSize: string,
 ) => {
     const log = (s: string) => {
         if (!quiet) {
@@ -42,10 +44,6 @@ const compile = (
         path.join(path.resolve(buildDir), withoutExtension + '.r1cs')
     const cFilepath = 
         path.join(path.resolve(buildDir), withoutExtension + '.c')
-    //const wasmFilepath = 
-        //path.join(path.resolve(buildDir), withoutExtension + '.wasm')
-    //const watFilepath = 
-        //path.join(path.resolve(buildDir), withoutExtension + '.wat')
     const symFilepath = 
         path.join(path.resolve(buildDir), withoutExtension + '.sym')
     const witnessGenFilepath
@@ -56,8 +54,6 @@ const compile = (
         for (const f of [
             r1csFilepath,
             cFilepath,
-            //wasmFilepath,
-            //watFilepath,
             symFilepath,
             witnessGenFilepath,
         ]) {
@@ -68,20 +64,16 @@ const compile = (
             log(`Skipping ${filepath}`)
             return { 
                 r1csFilepath,
-                //wasmFilepath,
                 symFilepath,
-                //watFilepath,
                 witnessGenFilepath,
             }
         }
     }
 
     log(`Compiling ${filepath}`)
-    //let cmd = `NODE_OPTIONS=--max-old-space-size=4096 node --stack-size=8192 ${circomPath} ` +
-        //`${filepath} -r ${r1csFilepath} -c ${cFilepath} -w ${wasmFilepath} ` +
-        //`-t ${watFilepath} -s ${symFilepath}`
-    let cmd = `NODE_OPTIONS=--max-old-space-size=4096 node --stack-size=8192 ${circomPath} ` +
+    let cmd = `NODE_OPTIONS=--max-old-space-size=${maxOldSpaceSize} node --stack-size=${stackSize} ${circomPath} ` +
         `${filepath} -r ${r1csFilepath} -c ${cFilepath} -s ${symFilepath}`
+    console.log(cmd)
 
     const compileOut = shelljs.exec(cmd, {silent: true})
     if (compileOut.stderr) {
@@ -119,6 +111,8 @@ const run = async (
     port: number,
     noClobber: boolean,
     quiet: boolean,
+    maxOldSpaceSize: string,
+    stackSize: string,
     compileOnly = false,
 ) => {
     const log = (s: string) => {
@@ -192,7 +186,7 @@ const run = async (
 
     for (const f of filesToCompile) {
         const start = Date.now()
-        const filepaths = compile(circomPath, f, buildDir, noClobber, quiet)
+        const filepaths = compile(circomPath, f, buildDir, noClobber, quiet, maxOldSpaceSize, stackSize)
         const cmd = `node ${snarkjsPath} r1cs info ${filepaths.r1csFilepath}`
         const output = shelljs.exec(cmd, {silent: true})
         let numInputs = 0
@@ -350,6 +344,28 @@ const main = async () => {
         },
     )
 
+    parser.add_argument(
+        '-m', '--max-old-space-size',
+        { 
+            required: false,
+            default: 4096,
+            action: 'store', 
+            type: Number, 
+            help: 'The value to set for the --max-old-space-size flag NODE_OPTIONS for circuit compilation',
+        },
+    )
+
+    parser.add_argument(
+        '-s', '--stack-size',
+        { 
+            required: false,
+            default: 1073741,
+            action: 'store', 
+            type: Number, 
+            help: 'The value to set for the NodeJS --stack-size flag for circuit compilation',
+        },
+    )
+
     const args = parser.parse_args()
 
     const port = args.port
@@ -407,6 +423,8 @@ const main = async () => {
         port,
         args.no_clobber,
         args.quiet,
+        args.max_old_space_size,
+        args.stack_size,
         args.compile_only,
     )
 }

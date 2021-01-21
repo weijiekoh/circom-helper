@@ -69,6 +69,8 @@ describe('Witness generation', () => {
             PORT,
             true,
             false,
+            '4096',
+            '65536',
             false,
         )
     })

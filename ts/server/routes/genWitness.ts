@@ -32,13 +32,22 @@ const handler = async (
     { circuit, inputs },
     state: any,
 ) => {
+    if (Object.keys(state.witnessGeneratorExes).indexOf(circuit) === -1) {
+        const errorMsg = 'Circuit not found'
+        throw{
+            code: errors.errorCodes.GENWITNESS_CIRCUIT_NOT_FOUND,
+            message: errorMsg,
+            data: errors.genError(
+                errors.BackendErrorNames.GENWITNESS_CIRCUIT_NOT_FOUND,
+                errorMsg,
+            )
+        }
+    }
     const buildDir = state.buildDir
     const tempDir = state.tempDir
-    const wasmFilepath = path.join(buildDir, circuit + '.wasm')
     const now = Date.now().toString()
     const inputJsonFilepath = path.join(buildDir, `${circuit}.${now}.in.json`)
     const outputJsonFilepath = path.join(buildDir, `${circuit}.${now}.out.json`)
-
     const expectedNumInputs = state.numInputsPerCircuit[circuit]
 
     // Count the number of elements in inputs
