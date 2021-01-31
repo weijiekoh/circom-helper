@@ -79,8 +79,9 @@ const handler = async (
         const output = shelljs.exec(cmd)
         if (output.code !== 0) {
             throw Error(output.stderr)
+        } else {
+            console.log(output.stdout)
         }
-        console.log(output)
 
         const witness = JSON.parse(fs.readFileSync(outputJsonFilepath).toString())
 
