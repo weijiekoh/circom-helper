@@ -75,10 +75,12 @@ const handler = async (
 
         // Run the witness generation binary
         let cmd = `${exe} ${inputJsonFilepath} ${outputJsonFilepath}`
-        const output = shelljs.exec(cmd, {silent: true})
+        //const output = shelljs.exec(cmd, {silent: true})
+        const output = shelljs.exec(cmd)
         if (output.code !== 0) {
             throw Error(output.stderr)
         }
+        console.log(output)
 
         const witness = JSON.parse(fs.readFileSync(outputJsonFilepath).toString())
 
