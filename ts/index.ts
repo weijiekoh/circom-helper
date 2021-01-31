@@ -76,7 +76,7 @@ const compile = (
     console.log(cmd)
 
     const compileOut = shelljs.exec(cmd, {silent: true})
-    if (compileOut.stderr) {
+    if (compileOut.stderr || compileOut.code === 1) {
         console.error(compileOut.stderr)
         throw new Error('Could not compile ' + circomPath)
     }
