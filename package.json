@@ -1,6 +1,6 @@
 {
   "name": "circom-helper",
-  "version": "0.0.21",
+  "version": "0.0.22",
   "description": "A convenient way for developers to compile, cache, and execute circom circuits, as well as to generate proofs.",
   "main": "build/index.js",
   "scripts": {
@@ -37,16 +37,15 @@
     "@iden3/binfileutils": "0.0.7",
     "ajv": "6.10.0",
     "argparse": "^2.0.1",
-    "circom": "0.5.35",
-    "circom_runtime": "^0.1.9",
-    "circomlib": "0.3.0",
-    "fastfile": "0.0.19",
+    "circom": "0.5.38",
+    "circom_runtime": "0.1.12",
+    "circomlib": "0.4.1",
     "koa": "^2.8.2",
     "koa-bodyparser": "^4.2.1",
     "koa-helmet": "^4.2.0",
     "module-alias": "^2.2.0",
     "shelljs": "^0.8.4",
-    "snarkjs": "0.3.45",
+    "snarkjs": "0.3.57",
     "verror": "^1.10.0",
     "yaml": "^1.10.0"
   },

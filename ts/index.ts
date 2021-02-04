@@ -6,9 +6,7 @@ import * as path from 'path'
 import * as shelljs from 'shelljs'
 import { launchServer } from './server'
 
-const fastFile = require('fastfile')
-import circomRuntime from 'circom_runtime'
-const { WitnessCalculatorBuilder } = circomRuntime
+import { WitnessCalculatorBuilder } from 'circom_runtime'
 
 const CIRCOM_FILE_EXTENSION = '.circom'
 const CACHE_DIRNAME = 'cache'
@@ -246,20 +244,6 @@ const run = async (
 
     return launchServer(port, state)
 }
-
-//const compileWasm = async (
-    //wasmFilepath: string,
-//) => {
-    //const fdWasm = await fastFile.readExisting(wasmFilepath)
-    //const wasm = await fdWasm.read(fdWasm.totalSize)
-    //await fdWasm.close()
-
-    //const options = {
-        //sanityCheck: true,
-    //}
-    //const wc = await WitnessCalculatorBuilder(wasm, options)
-    //return wc
-//}
 
 const loadSymbols = (
     symFilepath: string
