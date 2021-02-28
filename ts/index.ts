@@ -120,41 +120,29 @@ const run = async (
     }
 
     // Copy .cpp and .hpp files
-    let cppPath = path.join(
-        circomRuntimePath,
-        'c',
-        '*.cpp'
-    )
+    const cppPath = path.join(circomRuntimePath, 'c', '*.cpp')
     const target = path.resolve(buildDir)
-    let cmd
-    cmd = `cp ${cppPath} ${target}`
-    shelljs.exec(cmd)
+    shelljs.exec(`cp ${cppPath} ${target}`)
 
-    let hppPath = path.join(
-        circomRuntimePath,
-        'c',
-        '*.hpp'
-    )
-    cmd = `cp ${hppPath} ${target}`
-    shelljs.exec(cmd)
+    const hppPath = path.join(circomRuntimePath, 'c', '*.hpp')
+    shelljs.exec(`cp ${hppPath} ${target}`)
 
     const buildZqFieldPath = path.join(
         ffiasmPath,
         'src',
         'buildzqfield.js',
     )
-    cmd = `node ${buildZqFieldPath} -q 21888242871839275222246405745257275088548364400416034343698204186575808495617 -n Fr`
-    shelljs.exec(cmd)
 
-    cmd = `mv fr.asm fr.cpp fr.hpp ${target}`
-    shelljs.exec(cmd)
+    const prime = '21888242871839275222246405745257275088548364400416034343698204186575808495617'
+    shelljs.exec(`node ${buildZqFieldPath} -q ${prime} -n Fr`)
+
+    shelljs.exec(`mv fr.asm fr.cpp fr.hpp ${target}`)
 
     const frAsmPath = path.join(
         target,
         'fr.asm',
     )
-    cmd = `nasm -felf64 ${frAsmPath}`
-    shelljs.exec(cmd)
+    shelljs.exec(`nasm -felf64 ${frAsmPath}`)
 
     // For each circom file in each circuit dir, compile its circom files
     const filesToCompile: string[] = []
