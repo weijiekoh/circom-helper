@@ -49,7 +49,7 @@ TODO: add `zkutil` installation instructions
 
 2. Run the server:
 
-`node  build/index.js -c ./config.example.json -b ./compiled/ -t ./temp/ -p 9000 -nc`
+`node  build/index.js -c ./config.example.json -b ./compiled/ -p 9000 -nc`
 
 
 

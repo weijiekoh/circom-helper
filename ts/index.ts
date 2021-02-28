@@ -6,8 +6,6 @@ import * as path from 'path'
 import * as shelljs from 'shelljs'
 import { launchServer } from './server'
 
-import { WitnessCalculatorBuilder } from 'circom_runtime'
-
 const CIRCOM_FILE_EXTENSION = '.circom'
 const CACHE_DIRNAME = 'cache'
 const version = JSON.parse(fs.readFileSync(
