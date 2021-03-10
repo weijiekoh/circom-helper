@@ -10,7 +10,7 @@ It is a work in progress.
 Done:
 
 - witness generation endpoint
-- signal index lookup endpoing
+- signal index lookup endpoint
 
 To do:
 
@@ -35,8 +35,6 @@ Install dependencies:
 sudo apt-get install libgmp-dev nlohmann-json3-dev nasm g++
 ```
 
-TODO: add `zkutil` installation instructions
-
 ## User guide
 
 1. Create a config file. Use `config.example.json` as a reference. The
@@ -50,8 +48,6 @@ TODO: add `zkutil` installation instructions
 2. Run the server:
 
 `node  build/index.js -c ./config.example.json -b ./compiled/ -p 9000 -nc`
-
-
 
 ### JSON-RPC API
 
@@ -86,8 +82,3 @@ Inputs:
 Returns:
 
 - `index`: a numeric value as a string.
-
-**`gen_proof`**
-
-TODO
-
