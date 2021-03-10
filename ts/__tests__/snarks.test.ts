@@ -79,7 +79,7 @@ describe('Witness generation', () => {
         const circuit = 'poseidon'
         const inputs = stringifyBigInts({
             in: [BigInt(1), BigInt(2)],
-            expectedHash: BigInt('17117985411748610629288516079940078114952304104811071254131751175361957805920'),
+            expectedHash: BigInt('0x115cc0f5e7d690413df64c6b9662e9cf2a3617f2743245519e19607a4417189a'),
         })
 
         const resp = await post(1, 'gen_witness', { circuit, inputs })
@@ -99,8 +99,8 @@ describe('Witness generation', () => {
 
         const index = resp2.data.result.index
 
-        const expectedOut = witness[index].toString()
-        expect(expectedOut).toEqual('17117985411748610629288516079940078114952304104811071254131751175361957805920')
+        const expectedOut = BigInt(witness[index].toString()).toString(16)
+        expect(expectedOut).toEqual('115cc0f5e7d690413df64c6b9662e9cf2a3617f2743245519e19607a4417189a')
     })
 
     test('the gen_witness method should return an error if the inputs are wrong', async () => {
