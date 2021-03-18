@@ -45,6 +45,7 @@ const compile = (
     const witnessGenFilepath
         = path.join( path.resolve(buildDir), withoutExtension)
 
+    const buildDirContents = fs.readdirSync(buildDir)
     if (noClobber) {
         let skip = true
         for (const f of [
@@ -53,7 +54,10 @@ const compile = (
             symFilepath,
             witnessGenFilepath,
         ]) {
-            skip = skip && fs.existsSync(f)
+            if (buildDirContents.indexOf(path.basename(f)) === -1) {
+                skip = false
+                break
+            }
         }
         
         if (skip) {
