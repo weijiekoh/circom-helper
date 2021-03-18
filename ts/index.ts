@@ -206,17 +206,14 @@ const run = async (
         )
     }
 
-    // Load symbol files
-    log('Loading SYM files to memory...')
+    //// Load symbol files
+    //log('Loading SYM files to memory...')
+    //const symbols: any = {}
     const witnessGeneratorExes: any = {}
-    const symbols: any = {}
     for (const f of files) {
         const baseName = circuitBasename(f)
 
         witnessGeneratorExes[baseName] = baseName
-
-        const syms = loadSymbols(f.symFilepath)
-        symbols[baseName] = syms
     }
 
     // Launch the server
@@ -225,26 +222,9 @@ const run = async (
         numInputsPerCircuit,
         buildDir,
         witnessGeneratorExes,
-        symbols,
     }
 
     return launchServer(port, state)
-}
-
-const loadSymbols = (
-    symFilepath: string
-) => {
-    const symbols = {}
-    const lines = fs.readFileSync(symFilepath).toString().split('\n')
-    for (const line of lines) {
-        const vals = line.split(',')
-        symbols[vals[3]] = {
-            //labelIdx: Number(vals[0]),
-            varIdx: Number(vals[1]),
-            //componentIdx: Number(vals[2]),
-        }
-    }
-    return symbols
 }
 
 const main = async () => {
@@ -403,4 +383,4 @@ if (require.main === module) {
     main()
 }
 
-export { run, loadSymbols }
+export { run }

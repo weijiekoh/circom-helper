@@ -1,3 +1,8 @@
+import * as path from 'path'
+import * as errors from '../errors'
+
+const lineByLine = require('n-readlines')
+
 import { genValidator } from './utils'
 
 const handler = async (
@@ -5,7 +10,39 @@ const handler = async (
     state: any,
 ) => {
 
-    const index = Number(state.symbols[circuit][name].varIdx)
+    const symFile = path.join(state.buildDir, circuit + '.sym')
+    const liner = new lineByLine(symFile)
+    let line
+    let lineNumber = 0
+    let index
+
+    let found = false
+
+    while (line = liner.next().toString()) {
+        debugger
+        const vals = line.split(',')
+        if (vals.length > 2) {
+            if (vals[3] === name) {
+                debugger
+                index = Number(vals[1])
+                found = true
+                break
+            }
+        }
+    }
+    
+    debugger
+    if (!found) {
+        const errorMsg = 'Signal name not found'
+        throw{
+            code: errors.errorCodes.GETSIGNALINDEX_SIGNAL_NOT_FOUND,
+            message: errorMsg,
+            data: errors.genError(
+                errors.BackendErrorNames.GETSIGNALINDEX_SIGNAL_NOT_FOUND,
+                errorMsg,
+            )
+        }
+    }
 
     return { index }
 }
