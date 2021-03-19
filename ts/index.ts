@@ -114,6 +114,7 @@ const run = async (
     maxOldSpaceSize: string,
     stackSize: string,
     compileOnly = false,
+    skipAll = false,
 ) => {
     const log = (s: string) => {
         if (!quiet) {
@@ -173,6 +174,7 @@ const run = async (
     const files: any[] = []
 
     for (const f of filesToCompile) {
+        if (skipAll) { continue }
         const start = Date.now()
         const filepaths = compile(circomPath, f, buildDir, noClobber, quiet, maxOldSpaceSize, stackSize)
         const cmd = `node ${snarkjsPath} r1cs info ${filepaths.r1csFilepath}`
@@ -210,9 +212,6 @@ const run = async (
         )
     }
 
-    //// Load symbol files
-    //log('Loading SYM files to memory...')
-    //const symbols: any = {}
     const witnessGeneratorExes: any = {}
     for (const f of files) {
         const baseName = circuitBasename(f)
@@ -285,6 +284,15 @@ const main = async () => {
             required: false,
             action: 'store_true', 
             help: 'Only compile circuits and do not launch the JSON-RPC server',
+        },
+    )
+
+    parser.add_argument(
+        '-k', '--skip-all',
+        { 
+            required: false,
+            action: 'store_true', 
+            help: 'Launch the JSON-RPC server without compilation or checking if any circuits exist',
         },
     )
 
@@ -380,6 +388,7 @@ const main = async () => {
         args.max_old_space_size,
         args.stack_size,
         args.compile_only,
+        args.skip_all,
     )
 }
 
