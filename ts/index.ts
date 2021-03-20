@@ -24,6 +24,7 @@ const compile = (
     quiet: boolean,
     maxOldSpaceSize: string,
     stackSize: string,
+    skip = false,
 ) => {
     const log = (s: string) => {
         if (!quiet) {
@@ -69,28 +70,29 @@ const compile = (
             }
         }
     }
+    if (!skip) {
+        log(`Compiling ${filepath}`)
+        let cmd = `NODE_OPTIONS=--max-old-space-size=${maxOldSpaceSize} node --stack-size=${stackSize} ${circomPath} ` +
+            `${filepath} -r ${r1csFilepath} -c ${cFilepath} -s ${symFilepath}`
+        console.log(cmd)
 
-    log(`Compiling ${filepath}`)
-    let cmd = `NODE_OPTIONS=--max-old-space-size=${maxOldSpaceSize} node --stack-size=${stackSize} ${circomPath} ` +
-        `${filepath} -r ${r1csFilepath} -c ${cFilepath} -s ${symFilepath}`
-    console.log(cmd)
+        const compileOut = shelljs.exec(cmd, {silent: true})
+        if (compileOut.stderr || compileOut.code === 1) {
+            console.error(compileOut.stderr)
+            throw new Error('Could not compile ' + circomPath)
+        }
 
-    const compileOut = shelljs.exec(cmd, {silent: true})
-    if (compileOut.stderr || compileOut.code === 1) {
-        console.error(compileOut.stderr)
-        throw new Error('Could not compile ' + circomPath)
+        const srcs = 
+            path.join(path.resolve(buildDir), 'main.cpp') + ' ' +
+            path.join(path.resolve(buildDir), 'calcwit.cpp') + ' ' +
+            path.join(path.resolve(buildDir), 'utils.cpp') + ' ' +
+            path.join(path.resolve(buildDir), 'fr.cpp') + ' ' +
+            path.join(path.resolve(buildDir), 'fr.o')
+        cmd = `g++ -pthread ${srcs} ` +
+            `${cFilepath} -o ${witnessGenFilepath} ` + 
+            `-lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`
+        shelljs.exec(cmd, {silent: true})
     }
-
-    const srcs = 
-        path.join(path.resolve(buildDir), 'main.cpp') + ' ' +
-        path.join(path.resolve(buildDir), 'calcwit.cpp') + ' ' +
-        path.join(path.resolve(buildDir), 'utils.cpp') + ' ' +
-        path.join(path.resolve(buildDir), 'fr.cpp') + ' ' +
-        path.join(path.resolve(buildDir), 'fr.o')
-    cmd = `g++ -pthread ${srcs} ` +
-        `${cFilepath} -o ${witnessGenFilepath} ` + 
-        `-lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`
-    shelljs.exec(cmd, {silent: true})
 
     return { 
         r1csFilepath,
@@ -174,9 +176,8 @@ const run = async (
     const files: any[] = []
 
     for (const f of filesToCompile) {
-        if (skipAll) { continue }
         const start = Date.now()
-        const filepaths = compile(circomPath, f, buildDir, noClobber, quiet, maxOldSpaceSize, stackSize)
+        const filepaths = compile(circomPath, f, buildDir, noClobber, quiet, maxOldSpaceSize, stackSize, skipAll)
         const cmd = `node ${snarkjsPath} r1cs info ${filepaths.r1csFilepath}`
         const output = shelljs.exec(cmd, {silent: true})
         let numInputs = 0
