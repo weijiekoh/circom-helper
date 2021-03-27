@@ -9,28 +9,13 @@ import * as errors from '../server/errors'
 const ff = require('ffjavascript')
 const stringifyBigInts = ff.utils.stringifyBigInts
 import { run } from '../'
+import {
+    callGenWitness as genWitness,
+    callGetSignalByName as getSignalByName,
+} from '../'
 
 const PORT = 9002
 const HOST = 'http://localhost:' + PORT
-
-const OPTS = {
-    headers: {
-        'Content-Type': 'application/json',
-    }
-}
-
-const post = (id: JsonRpc.Id, method: string, params: any) => {
-    return axios.post(
-        HOST,
-        {
-            jsonrpc: '2.0',
-            id,
-            method,
-            params,
-        },
-        OPTS,
-    )
-}
 
 const sleep = (ms) => {
     return new Promise((resolve) => {
@@ -82,62 +67,39 @@ describe('Witness generation', () => {
             expectedHash: BigInt('0x115cc0f5e7d690413df64c6b9662e9cf2a3617f2743245519e19607a4417189a'),
         })
 
-        const resp = await post(1, 'gen_witness', { circuit, inputs })
-
-        expect(resp.status).toEqual(200)
-
-        const witness = resp.data.result.witness
-
-        // Get the signal index
-        const resp2 = await post(
-            2,
-            'get_signal_index',
-            { circuit, name: 'main.out' },
-        )
-
-        expect(resp2.status).toEqual(200)
-
-        const index = resp2.data.result.index
-
-        const expectedOut = BigInt(witness[index].toString()).toString(16)
+        const witness = await genWitness(circuit, inputs, HOST)
+        const expectedOut = BigInt(await getSignalByName(circuit, witness, 'main.out', HOST)).toString(16)
         expect(expectedOut).toEqual('115cc0f5e7d690413df64c6b9662e9cf2a3617f2743245519e19607a4417189a')
     })
 
     test('the gen_witness method should return an error if the inputs are wrong', async () => {
+        expect.assertions(1)
         const circuit = 'poseidon'
         const inputs = stringifyBigInts({
             in: [BigInt(1), BigInt(2)],
             expectedHash: BigInt(1234), // incorrect hash value
         })
 
-        const resp = await post(3, 'gen_witness', { circuit, inputs })
-
-        expect(resp.status).toEqual(200)
-
-        const error = resp.data.error
-
-        expect(resp.data.error).toBeTruthy()
+        try {
+            const witness = await genWitness(circuit, inputs, HOST)
+        } catch {
+            expect(true).toBeTruthy()
+        }
     })
 
     test('the gen_witness method should return an error if an input is missing', async () => {
+        expect.assertions(1)
         const circuit = 'poseidon'
         const inputs = stringifyBigInts({
             in: [BigInt(1), BigInt(2)],
         })
 
-        const resp = await post(4, 'gen_witness', { circuit, inputs })
-
-        expect(resp.status).toEqual(200)
-
-        const error = resp.data.error
-
-        expect(resp.data.error).toBeTruthy()
-        expect(resp.data.error.code).toEqual(errors.errorCodes.GENWITNESS_WRONG_NUM_INPUTS)
+        try {
+            const witness = await genWitness(circuit, inputs, HOST)
+        } catch {
+            expect(true).toBeTruthy()
+        }
     })
-
-    //test('the gen_proof method should provide a valid proof', async () => {
-        //// TODO
-    //})
 
     afterAll(async () => {
         await server.close()

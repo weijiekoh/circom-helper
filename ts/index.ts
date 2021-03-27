@@ -5,6 +5,10 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as shelljs from 'shelljs'
 import { launchServer } from './server'
+import {
+    genWitness,
+    getSignalByName,
+} from './utils'
 
 const CIRCOM_FILE_EXTENSION = '.circom'
 const CACHE_DIRNAME = 'cache'
@@ -397,4 +401,8 @@ if (require.main === module) {
     main()
 }
 
-export { run }
+export {
+    run,
+    genWitness as callGenWitness,
+    getSignalByName as callGetSignalByName,
+}

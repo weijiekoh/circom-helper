@@ -19,11 +19,9 @@ const handler = async (
     let found = false
 
     while (line = liner.next().toString()) {
-        debugger
         const vals = line.split(',')
         if (vals.length > 2) {
             if (vals[3] === name) {
-                debugger
                 index = Number(vals[1])
                 found = true
                 break
@@ -31,7 +29,6 @@ const handler = async (
         }
     }
     
-    debugger
     if (!found) {
         const errorMsg = 'Signal name not found'
         throw{

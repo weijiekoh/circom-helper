@@ -4,7 +4,6 @@ import * as shelljs from 'shelljs'
 import * as errors from '../errors'
 import { genValidator } from './utils'
 const binFileUtils = require('@iden3/binfileutils')
-import { writeBin } from '../../wtnsUtils'
 const ff = require('ffjavascript')
 const stringifyBigInts = ff.utils.stringifyBigInts
 

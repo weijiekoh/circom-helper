@@ -1,6 +1,6 @@
 {
   "name": "circom-helper",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A convenient way for developers to compile, cache, and execute circom circuits, as well as to generate proofs.",
   "main": "build/index.js",
   "scripts": {
@@ -47,12 +47,12 @@
     "n-readlines": "^1.0.1",
     "shelljs": "^0.8.4",
     "snarkjs": "0.3.60",
+    "axios": "^0.21.0",
     "verror": "^1.10.0",
     "yaml": "^1.10.0"
   },
   "devDependencies": {
     "@types/jest": "^26.0.19",
-    "axios": "^0.21.0",
     "ffjavascript": "^0.2.33",
     "jest": "^26.6.3",
     "ts-jest": "^26.4.4",
