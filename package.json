@@ -1,6 +1,6 @@
 {
   "name": "circom-helper",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "A convenient way for developers to compile, cache, and execute circom circuits, as well as to generate proofs.",
   "main": "build/index.js",
   "scripts": {

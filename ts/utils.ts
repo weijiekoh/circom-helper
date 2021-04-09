@@ -30,7 +30,6 @@ const genWitness = async (
     url = 'http://localhost:9001',
 ) => {
     const resp = await post(1, 'gen_witness', { circuit, inputs }, url)
-    debugger
     if (resp.data.error) {
         throw Error(resp.data.error.message)
     }
