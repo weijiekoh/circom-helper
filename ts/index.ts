@@ -95,7 +95,16 @@ const compile = (
         cmd = `g++ -pthread ${srcs} ` +
             `${cFilepath} -o ${witnessGenFilepath} ` + 
             `-lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`
-        shelljs.exec(cmd, {silent: true})
+
+        const gppOut = shelljs.exec(cmd, {silent: true})
+        if (gppOut.stderr) {
+            console.error(
+                'Error running the g++ command. Please check if all ' + 
+                'dependencies are present.'
+            )
+            console.error(cmd)
+            console.error(gppOut.stderr)
+        }
     }
 
     return { 
