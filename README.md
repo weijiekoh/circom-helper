@@ -24,10 +24,18 @@ npm i && \
 npm run build
 ```
 
-Install dependencies:
+### Install OS dependencies
+
+On Debian, Ubuntu, or derivatives:
 
 ```
 sudo apt-get install libgmp-dev nlohmann-json3-dev nasm g++
+```
+
+On openSUSE or derivatives:
+
+```
+sudo zypper install gmp-devel nlohmann_json-devel nasm g++
 ```
 
 ## User guide
