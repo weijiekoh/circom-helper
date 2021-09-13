@@ -7,6 +7,7 @@
     "watch": "tsc --watch",
     "build": "tsc",
     "prepare": "tsc",
+    "serve": "node ./build/index.js -c ./config.example.json -b ./compiled/ -p 9000 -nc",
     "test-server": "jest --testPathPattern=ts/__tests__/Server.test.ts",
     "test-server-debug": "node --inspect-brk ./node_modules/.bin/jest --testPathPattern=ts/__tests__/Server.test.ts",
     "test-snarks": "jest --testPathPattern=__tests__/snarks.test.ts",

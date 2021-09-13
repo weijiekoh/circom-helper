@@ -43,9 +43,17 @@ sudo apt-get install libgmp-dev nlohmann-json3-dev nasm g++
 2. Create a `compiled/` and `temp/` directory for compiled circuits and
    tempoary files.
 
-2. Run the server:
+3. Run the server:
 
-`node  build/index.js -c ./config.example.json -b ./compiled/ -p 9000 -nc`
+        npm run serve
+
+4. Run the internal test suite for the server:
+
+        npm run test-server
+
+5. Run a test suite for the example circuit under `example/`:
+
+        npm run test-snarks
 
 ### JSON-RPC API
 
@@ -53,7 +61,7 @@ sudo apt-get install libgmp-dev nlohmann-json3-dev nasm g++
 
 Generates a witness given a circuit name and public inputs.
 
-Inputs: 
+Inputs:
 
 - `circuit`: the name of the circuit. For example, if `test.circom` is in one
   of the `circuitDirs`, and you want to generate a witness for inputs to this
