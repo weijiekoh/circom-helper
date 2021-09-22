@@ -42,8 +42,14 @@ const getSignalByName = async (
     name: string,
     url = 'http://localhost:9001',
 ) => {
-    const resp = await post(1, 'get_signal_index', { circuit, name }, url)
-    return witness[Number(resp.data.result.index)]
+    try {
+        const resp = await post(1, 'get_signal_index', { circuit, name }, url)
+        return witness[Number(resp.data.result.index)]
+    }
+
+    catch(e) {
+        throw Error(e.message)
+    }
 }
 
 export {
