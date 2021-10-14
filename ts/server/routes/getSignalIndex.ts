@@ -10,26 +10,11 @@ const handler = async (
     state: any,
 ) => {
 
-    const symFile = path.join(state.buildDir, circuit + '.sym')
-    const liner = new lineByLine(symFile)
-    let line
-    let lineNumber = 0
-    let index
+    const result = state.db.prepare(
+        'SELECT idx FROM symbols WHERE circuit = ? AND name = ?', 
+    ).get(circuit, name)
 
-    let found = false
-
-    while (line = liner.next().toString()) {
-        const vals = line.split(',')
-        if (vals.length > 2) {
-            if (vals[3] === name) {
-                index = Number(vals[1])
-                found = true
-                break
-            }
-        }
-    }
-    
-    if (!found) {
+    if (!result) {
         const errorMsg = 'Signal name not found'
         throw{
             code: errors.errorCodes.GETSIGNALINDEX_SIGNAL_NOT_FOUND,
@@ -39,9 +24,9 @@ const handler = async (
                 errorMsg,
             )
         }
+    } else {
+        return { index: result.idx }
     }
-
-    return { index }
 }
 
 const route = {

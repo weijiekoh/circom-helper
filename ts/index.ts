@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+const betterSqlite3 = require('better-sqlite3')
+const lineByLine = require('n-readlines')
 import * as argparse from 'argparse'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -215,6 +217,32 @@ const run = async (
         files.push(filepaths)
     }
 
+    // Iterate through the .sym files and save signals in a DB
+    const db = new betterSqlite3(':memory:')
+    db.exec('CREATE TABLE symbols (circuit TEXT, idx INTEGER, name TEXT)')
+
+    const stmt = db.prepare('INSERT INTO symbols (circuit, idx, name) VALUES (?, ?, ?)')
+    for (const file of fs.readdirSync(buildDir)) {
+        if (file.endsWith('.sym')) {
+            const circuit = file.slice(0, file.length - '.sym'.length)
+            const symFile = path.join(buildDir, file)
+            const liner = new lineByLine(symFile)
+            let line
+            let lineNumber = 0
+            let index
+
+            while (line = liner.next()) {
+                line = line.toString()
+                const vals = line.split(',')
+                if (vals.length > 2) {
+                    const idx = Number(vals[1])
+                    const name = vals[3]
+                    stmt.run(circuit, idx, name)
+                }
+            }
+        }
+    }
+
     if (compileOnly) {
         return
     }
@@ -239,6 +267,7 @@ const run = async (
         numInputsPerCircuit,
         buildDir,
         witnessGeneratorExes,
+        db,
     }
 
     return launchServer(port, state)
