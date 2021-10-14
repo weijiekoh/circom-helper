@@ -218,6 +218,7 @@ const run = async (
     }
 
     // Iterate through the .sym files and save signals in a DB
+    console.log('Caching circuit symbols and indices...')
     const db = new betterSqlite3(':memory:')
     db.exec('CREATE TABLE symbols (circuit TEXT, idx INTEGER, name TEXT)')
 
