@@ -76,7 +76,7 @@ const compile = (
     }
     if (!skip) {
         log(`Compiling ${filepath}`)
-        let cmd = `${circomPath} --r1cs --c --sym -o ${path.resolve(buildDir)} ${filepath}`
+        let cmd = `${circomPath} --O0 --r1cs --c --sym -o ${path.resolve(buildDir)} ${filepath}`
         console.log(cmd)
 
         const compileOut = shelljs.exec(cmd, {silent: true})
