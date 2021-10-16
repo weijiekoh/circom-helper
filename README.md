@@ -6,6 +6,9 @@ It uses circom version 2, which has better performance than the previous
 version. Note that circuits written for the previous version of circom must be
 slightly modified to be compatible with circom 2.
 
+To use the old version of circom, install `circom-helper` 0.1.0 or 0.2.0 via
+NPM.
+
 It compiles circuits and exposes a JSON-RPC API which allows developers to
 generate witnesses and access signal values without writing command-line glue
 scripts.
