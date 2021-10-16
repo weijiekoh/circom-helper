@@ -2,14 +2,13 @@
 
 `circom-helper` allows developers to test circom circuits quickly and easily.
 
+It uses circom version 2, which has better performance than the previous
+version. Note that circuits written for the previous version of circom must be
+slightly modified to be compatible with circom 2.
+
 It compiles circuits and exposes a JSON-RPC API which allows developers to
 generate witnesses and access signal values without writing command-line glue
 scripts.
-
-Done:
-
-- witness generation endpoint
-- signal index lookup endpoint
 
 ## Installation
 
@@ -40,13 +39,15 @@ sudo zypper install gmp-devel nlohmann_json-devel nasm g++
 
 ## User guide
 
-1. Create a config file. Use `config.example.json` as a reference. The
-   `circuitDirs` field should be an array of directories which contain the
-   `circom` files you wish to compile. Note that there should not be any
-   filename collisions, even across directories. Additionally, ensure
-   that you install `circom`, `snarkjs`, `circom_runtime`, and `ffiasm`
-   in your project's `node_modules`, and check their paths in the config
-   file.
+1. Create a config file. Use `config.example.json` as a reference. 
+
+    - The `circuitDirs` field should be an array of directories which contain
+      the `circom` files you wish to compile. Note that there should not be any
+      filename collisions, even across directories.
+    - The `circom` field should be a path to the `circom` binary, relative to
+      the config file's path.
+    - The `snarkjs` field should be a path to the `build/cli.cjs` in a
+      `snarkjs` `node_modules` package.
 
 2. Create a `compiled/` and `temp/` directory for compiled circuits and
    tempoary files.

@@ -28,8 +28,6 @@ const compile = (
     buildDir: string,
     noClobber: boolean,
     quiet: boolean,
-    maxOldSpaceSize: string,
-    stackSize: string,
     skip = false,
 ) => {
     const log = (s: string) => {
@@ -46,7 +44,7 @@ const compile = (
     const r1csFilepath = 
         path.join(path.resolve(buildDir), withoutExtension + '.r1cs')
     const cFilepath = 
-        path.join(path.resolve(buildDir), withoutExtension + '.c')
+        path.join(path.resolve(buildDir), withoutExtension + '_cpp')
     const symFilepath = 
         path.join(path.resolve(buildDir), withoutExtension + '.sym')
     const witnessGenFilepath
@@ -78,8 +76,7 @@ const compile = (
     }
     if (!skip) {
         log(`Compiling ${filepath}`)
-        let cmd = `NODE_OPTIONS=--max-old-space-size=${maxOldSpaceSize} node --stack-size=${stackSize} ${circomPath} ` +
-            `${filepath} -r ${r1csFilepath} -c ${cFilepath} -s ${symFilepath}`
+        let cmd = `${circomPath} --r1cs --c --sym -o ${path.resolve(buildDir)} ${filepath}`
         console.log(cmd)
 
         const compileOut = shelljs.exec(cmd, {silent: true})
@@ -98,22 +95,46 @@ const compile = (
             `${cFilepath} -o ${witnessGenFilepath} ` + 
             `-lgmp -std=c++11 -O3 -fopenmp -DSANITY_CHECK`
 
-        const gppOut = shelljs.exec(cmd, {silent: true})
-        if (gppOut.stderr) {
+        shelljs.cd(
+            path.join(
+                path.resolve(buildDir),
+                withoutExtension + '_cpp',
+            ),
+        )
+
+        const makeCmdOut = shelljs.exec('make', {silent: true})
+
+        if (makeCmdOut.stderr) {
             console.error(
-                'Error running the g++ command. Please check if all ' + 
+                'Error running the make command. Please check if all ' + 
                 'dependencies are present.'
             )
             console.error(cmd)
-            console.error(gppOut.stderr)
+            console.error(makeCmdOut.stderr)
         }
+
+        shelljs.mv(
+            path.join(
+                path.resolve(buildDir),
+                withoutExtension + '_cpp',
+                withoutExtension,
+            ),
+            path.resolve(buildDir),
+        )
+
+        shelljs.mv(
+            path.join(
+                path.resolve(buildDir),
+                withoutExtension + '_cpp',
+                withoutExtension + '.dat',
+            ),
+            path.resolve(buildDir),
+        )
     }
 
     return { 
         r1csFilepath,
-        //wasmFilepath,
         symFilepath,
-        //watFilepath,
         witnessGenFilepath,
     }
 }
@@ -121,15 +142,11 @@ const compile = (
 const run = async (
     circomPath: string,
     snarkjsPath: string,
-    circomRuntimePath: string,
-    ffiasmPath: string,
     circuitDirs: string[],
     buildDir: string,
     port: number,
     noClobber: boolean,
     quiet: boolean,
-    maxOldSpaceSize: string,
-    stackSize: string,
     compileOnly = false,
     skipAll = false,
 ) => {
@@ -138,31 +155,6 @@ const run = async (
             console.log(s)
         }
     }
-
-    // Copy .cpp and .hpp files
-    const cppPath = path.join(circomRuntimePath, 'c', '*.cpp')
-    const target = path.resolve(buildDir)
-    shelljs.exec(`cp ${cppPath} ${target}`)
-
-    const hppPath = path.join(circomRuntimePath, 'c', '*.hpp')
-    shelljs.exec(`cp ${hppPath} ${target}`)
-
-    const buildZqFieldPath = path.join(
-        ffiasmPath,
-        'src',
-        'buildzqfield.js',
-    )
-
-    const prime = '21888242871839275222246405745257275088548364400416034343698204186575808495617'
-    shelljs.exec(`node ${buildZqFieldPath} -q ${prime} -n Fr`)
-
-    shelljs.exec(`mv fr.asm fr.cpp fr.hpp ${target}`)
-
-    const frAsmPath = path.join(
-        target,
-        'fr.asm',
-    )
-    shelljs.exec(`nasm -felf64 ${frAsmPath}`)
 
     // For each circom file in each circuit dir, compile its circom files
     const filesToCompile: string[] = []
@@ -192,7 +184,7 @@ const run = async (
 
     for (const f of filesToCompile) {
         const start = Date.now()
-        const filepaths = compile(circomPath, f, buildDir, noClobber, quiet, maxOldSpaceSize, stackSize, skipAll)
+        const filepaths = compile(circomPath, f, buildDir, noClobber, quiet, skipAll)
         const cmd = `node ${snarkjsPath} r1cs info ${filepaths.r1csFilepath}`
         const output = shelljs.exec(cmd, {silent: true})
         let numInputs = 0
@@ -265,6 +257,7 @@ const run = async (
     // Launch the server
     log(`Launched JSON-RPC server at port ${port}`)
     const state = {
+        snarkjsPath,
         numInputsPerCircuit,
         buildDir,
         witnessGeneratorExes,
@@ -350,28 +343,6 @@ const main = async () => {
         },
     )
 
-    parser.add_argument(
-        '-m', '--max-old-space-size',
-        { 
-            required: false,
-            default: 4096,
-            action: 'store', 
-            type: Number, 
-            help: 'The value to set for the --max-old-space-size flag NODE_OPTIONS for circuit compilation',
-        },
-    )
-
-    parser.add_argument(
-        '-s', '--stack-size',
-        { 
-            required: false,
-            default: 1073741,
-            action: 'store', 
-            type: Number, 
-            help: 'The value to set for the NodeJS --stack-size flag for circuit compilation',
-        },
-    )
-
     const args = parser.parse_args()
 
     const port = args.port
@@ -409,28 +380,14 @@ const main = async () => {
         config.snarkjs,
     )
 
-    const circomRuntimePath = path.join(
-        path.dirname(configFilepath),
-        config.circom_runtime,
-    )
-
-    const ffiasmPath = path.join(
-        path.dirname(configFilepath),
-        config.ffiasm,
-    )
-
     run(
         circomPath,
         snarkjsPath,
-        circomRuntimePath,
-        ffiasmPath,
         config.circuitDirs.map(resolveCircuitDirpath),
         buildDirPath,
         port,
         args.no_clobber,
         args.quiet,
-        args.max_old_space_size,
-        args.stack_size,
         args.compile_only,
         args.skip_all,
     )

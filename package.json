@@ -1,6 +1,6 @@
 {
   "name": "circom-helper",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A convenient way for developers to compile, cache, and execute circom circuits, as well as to generate proofs.",
   "main": "build/index.js",
   "scripts": {
@@ -40,9 +40,7 @@
     "argparse": "^2.0.1",
     "axios": "^0.21.0",
     "better-sqlite3": "^7.4.3",
-    "circom": "0.5.42",
-    "circomlib": "0.5.1",
-    "ffiasm": "0.1.3",
+    "circomlib": "^2.0.0",
     "koa": "^2.8.2",
     "koa-bodyparser": "^4.2.1",
     "koa-helmet": "^4.2.0",
