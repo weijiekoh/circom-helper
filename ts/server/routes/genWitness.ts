@@ -4,8 +4,6 @@ import * as shelljs from 'shelljs'
 import * as errors from '../errors'
 import { genValidator } from './utils'
 const binFileUtils = require('@iden3/binfileutils')
-const ff = require('ffjavascript')
-const stringifyBigInts = ff.utils.stringifyBigInts
 
 const countItemInputs = (item: any) => {
     let numInputs = 0
