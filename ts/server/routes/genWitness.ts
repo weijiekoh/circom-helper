@@ -4,8 +4,6 @@ import * as shelljs from 'shelljs'
 import * as errors from '../errors'
 import { genValidator } from './utils'
 const binFileUtils = require('@iden3/binfileutils')
-const ff = require('ffjavascript')
-const stringifyBigInts = ff.utils.stringifyBigInts
 
 const countItemInputs = (item: any) => {
     let numInputs = 0
@@ -45,7 +43,9 @@ const handler = async (
     const buildDir = state.buildDir
     const tempDir = state.tempDir
     const now = Date.now().toString()
+    const snarkjsPath = state.snarkjsPath
     const inputJsonFilepath = path.join(buildDir, `${circuit}.${now}.in.json`)
+    const outputWtnsFilepath = path.join(buildDir, `${circuit}.${now}.out.wtns`)
     const outputJsonFilepath = path.join(buildDir, `${circuit}.${now}.out.json`)
     const expectedNumInputs = state.numInputsPerCircuit[circuit]
 
@@ -66,16 +66,22 @@ const handler = async (
     // The witness generator executable
     const exe = path.join(buildDir, state.witnessGeneratorExes[path.basename(circuit)])
     try {
-        // TODO: try with wtns instead of json and compare speed
         fs.writeFileSync(
             inputJsonFilepath,
             JSON.stringify(inputs),
         )
 
         // Run the witness generation binary
-        let cmd = `${exe} ${inputJsonFilepath} ${outputJsonFilepath}`
+        let cmd = `${exe} ${inputJsonFilepath} ${outputWtnsFilepath}`
         //const output = shelljs.exec(cmd, {silent: true})
-        const output = shelljs.exec(cmd)
+        let output = shelljs.exec(cmd)
+        if (output.code !== 0) {
+            throw Error(output.stderr)
+        }
+
+        // Convert the wtns file to JSON
+        cmd = `node ${snarkjsPath} wej ${outputWtnsFilepath} ${outputJsonFilepath}`
+        output = shelljs.exec(cmd)
         if (output.code !== 0) {
             throw Error(output.stderr)
         }
