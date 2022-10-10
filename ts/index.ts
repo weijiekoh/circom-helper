@@ -11,6 +11,7 @@ import {
     genWitness,
     getSignalByName,
 } from './utils'
+import { readNumInputs } from './read_num_inputs'
 
 const CIRCOM_FILE_EXTENSION = '.circom'
 const CACHE_DIRNAME = 'cache'
@@ -187,17 +188,9 @@ const run = async (
         const start = Date.now()
         const filepaths = compile(circomPath, f, buildDir, noClobber, quiet, skipAll)
         symFilepaths.push(filepaths.symFilepath)
-        const cmd = `node ${snarkjsPath} r1cs info ${filepaths.r1csFilepath}`
-        const output = shelljs.exec(cmd, {silent: true})
-        let numInputs = 0
-        const m1 = output.match(/# of Private Inputs: (\d+)/)
-        const m2 = output.match(/# of Public Inputs: (\d+)/)
-        if (m1) {
-            numInputs += Number(m1[1])
-        }
-        if (m2) {
-            numInputs += Number(m2[1])
-        }
+
+        const n = await readNumInputs(filepaths.r1csFilepath)
+        const numInputs = n.numPubInputs + n.numPrivInputs
         const bn = path.basename(f)
         const circuitName = bn.slice(0, bn.length - 7)
         numInputsPerCircuit[circuitName] =  numInputs
