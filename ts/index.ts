@@ -181,10 +181,12 @@ const run = async (
     }
 
     const files: any[] = []
+    const symFilepaths: any[] = []
 
     for (const f of filesToCompile) {
         const start = Date.now()
         const filepaths = compile(circomPath, f, buildDir, noClobber, quiet, skipAll)
+        symFilepaths.push(filepaths.symFilepath)
         const cmd = `node ${snarkjsPath} r1cs info ${filepaths.r1csFilepath}`
         const output = shelljs.exec(cmd, {silent: true})
         let numInputs = 0
@@ -219,6 +221,11 @@ const run = async (
         if (file.endsWith('.sym')) {
             const circuit = file.slice(0, file.length - '.sym'.length)
             const symFile = path.join(buildDir, file)
+
+            if (symFilepaths.indexOf(symFile) === -1) {
+                continue
+            }
+
             const liner = new lineByLine(symFile)
             let line
             let lineNumber = 0
